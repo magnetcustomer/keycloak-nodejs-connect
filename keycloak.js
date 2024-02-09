@@ -451,7 +451,7 @@ Keycloak.prototype.getRealmName = function (req) {
 
     const token = decodeTokenString(getTokenStringFromRequest(req));
 
-    if (token && token.payload && token.payload.iss && token.payload.iss.startsWith(this.keycloakConfig['auth-server-url'])) {
+    if (token && token.payload && token.payload.iss) {
         return this.getRealmNameFromToken(token);
     }
 
