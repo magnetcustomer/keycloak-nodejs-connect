@@ -1,4 +1,20 @@
-const jwt = require('jsonwebtoken');
+/*
+ * Copyright 2016 Red Hat Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+'use strict'
 
 const BearerStore = require('./stores/bearer-store')
 const CookieStore = require('./stores/cookie-store')
@@ -105,7 +121,7 @@ Keycloak.prototype.middleware = function (options) {
     options.logout = options.logout || '/logout'
     options.admin = options.admin || '/'
 
-    const resolver = Object.keys(this.configs).length === 1 ? () => this.configs[Object.keys(this.configs)[0]].realm : this.getRealmName
+    const resolver = Object.keys(this.configs).length === 1 ? () => this.configs[Object.keys(this.configs)[0]].realm : options.realmResolve
 
     const middlewares = []
 
@@ -431,49 +447,6 @@ Keycloak.prototype.getAccount = function (request, token) {
 
 Keycloak.prototype.redirectToLogin = function (request) {
     return !this.getConfig(request).bearerOnly
-}
-
-Keycloak.prototype.getRealmName = function (req) {
-    function decodeTokenString(tokenString) {
-        return jwt.decode(tokenString, {'complete': true});
-    }
-
-    function getTokenStringFromRequest(req) {
-        const authorization = req.headers.authorization || req.headers.Authorization;
-        if (!authorization) {
-            return;
-        }
-        if (authorization.toLowerCase().startsWith('bearer')) {
-            return authorization.split(' ').pop();
-        }
-        return authorization;
-    }
-
-    const token = decodeTokenString(getTokenStringFromRequest(req));
-
-    if (token && token.payload && token.payload.iss) {
-        return this.keycloak.getRealmNameFromToken(token);
-    }
-
-    return this.keycloak.getRealmNameFromRequest(req);
-}
-
-Keycloak.prototype.getRealmNameFromToken = function (token) {
-    return token.payload.iss.split('/').pop();
-}
-
-/**
- * Method that should return the realm name for the given request.
- *
- * It will be called when the request doesn't have a valid token.
- *
- * By default, it's empty, so it must be implemented by the user.
- * If not implemented, the admin and logout endpoints won't work.
- *
- * @param {Object} request The HTTP request.
- */
-Keycloak.prototype.getRealmNameFromRequest = function (request) {
-    // should be implemented by user
 }
 
 module.exports = Keycloak
