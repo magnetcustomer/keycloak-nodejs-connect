@@ -452,10 +452,10 @@ Keycloak.prototype.getRealmName = function (req) {
     const token = decodeTokenString(getTokenStringFromRequest(req));
 
     if (token && token.payload && token.payload.iss) {
-        return this.getRealmNameFromToken(token);
+        return this.keycloak.getRealmNameFromToken(token);
     }
 
-    return this.getRealmNameFromRequest(req);
+    return this.keycloak.getRealmNameFromRequest(req);
 }
 
 Keycloak.prototype.getRealmNameFromToken = function (token) {
