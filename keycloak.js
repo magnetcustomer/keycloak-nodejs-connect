@@ -89,6 +89,24 @@ function Keycloak(config, keycloakConfig) {
     } else if (config && config.cookies) {
         this.stores.push(CookieStore)
     }
+
+    this.configConnector = config;
+}
+
+Keycloak.prototype.setConfig = function (keycloakConfig) {
+    // If keycloakConfig is null, Config() will search for `keycloak.json`.
+    const configs = Array.isArray(keycloakConfig) ? keycloakConfig.map(kcRealmConfig => new Config(kcRealmConfig)) : [new Config(keycloakConfig)];
+
+    configs.forEach(realmConfig => {
+        // Add the custom scope value
+        realmConfig.scope = this.configConnector.scope;
+        realmConfig.idpHint = this.configConnector.idpHint;
+    });
+
+    this.configs = configs.reduce((previous, realmConfig) => Object.assign(previous, {[realmConfig.realm]: realmConfig}), {});
+
+    this.grantManagers = configs.reduce((previous, realmConfig) => Object.assign(previous, {[realmConfig.realm]: new GrantManager(realmConfig)}), {});
+
 }
 
 /**
