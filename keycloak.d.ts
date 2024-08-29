@@ -215,6 +215,8 @@ declare namespace KeycloakConnect {
     interface Keycloak {
         grantManager: GrantManager
 
+        setConfig(keycloakConfig: KeycloakConfig[]): void
+
         /**
          * Obtain an array of middleware for use in your application.
          *
